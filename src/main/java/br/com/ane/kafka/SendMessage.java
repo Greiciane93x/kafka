@@ -2,6 +2,7 @@ package br.com.ane.kafka;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,9 +13,12 @@ public class SendMessage {
 
     private final Logger logger;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final String topicCartoes;
 
-    public SendMessage(KafkaTemplate<String, Object> kafkaTemplate) {
+    public SendMessage(KafkaTemplate<String, Object> kafkaTemplate,
+                       @Value("${config.kafka.topic.testando}") String topicCartoes) {
         this.kafkaTemplate = kafkaTemplate;
+        this.topicCartoes = topicCartoes;
         this.logger = LoggerFactory.getLogger(SendMessage.class);
     }
 

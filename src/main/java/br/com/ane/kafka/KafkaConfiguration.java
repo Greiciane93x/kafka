@@ -1,10 +1,14 @@
 package br.com.ane.kafka;
 
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
@@ -18,14 +22,16 @@ import static org.apache.kafka.clients.producer.ProducerConfig.*;
 public class KafkaConfiguration {
 
     //setando no application.properties
-    private final String kafkaServer;
+    private final String kafkaServer, topicTest;
     private final Integer retry;
     private final Integer bufferMemory;
 
     public KafkaConfiguration(@Value("${config.kafka.server}") String kafkaServer,
+                              @Value("${config.kafka.topic.testando}") String topicTest,
                               @Value("${config.kafka.retry}") Integer retry,
                               @Value("${config.kafka.bufferMemory}") Integer bufferMemory) {
         this.kafkaServer = kafkaServer;
+        this.topicTest = topicTest;
         this.retry = retry;
         this.bufferMemory = bufferMemory;
     }
@@ -47,5 +53,22 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public KafkaAdmin admin(){
+        return new KafkaAdmin(Map.of(
+                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer
+        ));
+
+    }
+
+    @Bean
+    public NewTopic cartoes(){
+        return TopicBuilder.name(topicTest)
+                .partitions(5)
+//                .replicas(3) // temos apenas uma instancia do kafka, n tem como configurar
+                .compact()
+                .build();
     }
 }
